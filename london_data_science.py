@@ -35,8 +35,11 @@ def write_test_labels(Ytest, outfile="data/testLabels.csv"):
     """ Writes 9000 testing predictions to file """
     f = open(outfile, 'w')
 
+    f.write('Id,Solution\n')
+    count = 1
     for prediction in Ytest:
-        f.write(str(prediction) + "\n")
+        f.write("%d,%d\n" % (count,prediction))
+        count += 1
 
     f.close()
 

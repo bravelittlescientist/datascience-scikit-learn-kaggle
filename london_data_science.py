@@ -9,24 +9,29 @@ import os
 
 import numpy as np
 
-from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier
-from sklearn.naive_bayes import GaussianNB
-from sklearn.cross_validation import cross_val_score
+# from sklearn.naive_bayes import GaussianNB
+# from sklearn.linear_model import LogisticRegression
+# from sklearn.feature_selection import SelectKBest, f_regression
+# from sklearn.lda import LDA
+# from sklearn.grid_search import GridSearchCV
+# from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier, GradientBoostingClassifier, ExtraTreesClassifier
+#from sklearn.preprocessing import MinMaxScaler
+# from sklearn.feature_selection import SelectPercentile, f_classif
+
 from sklearn.svm import SVC
+from sklearn.pipeline import Pipeline
+from sklearn.decomposition import PCA
+from sklearn.cross_validation import cross_val_score
 
 def train(Xtrain, Ytrain, Xtest):
     """ Trains and predicts dataset with a classifier, I try a few.
 
     Prints cross-validation information, as well.
     Returns Ytest, predictions for the test data."""
+    clf = Pipeline([('reduce_dim', PCA()), ('svm', SVC(C=10))])
 
-    # clf = RandomForestClassifier(n_estimators = 600)
-    # clf = GaussianNB()
-    # clf = AdaBoostClassifier()
-    clf = SVC()
-
-    print "Average cross-validation performance, 10-fold:"
     scores = cross_val_score(clf, Xtrain, Ytrain, cv=10)
+    print "Average cross-validation performance, 10-fold:"
     print scores.mean(),"+/-",scores.std()
 
     print "Predicting on test data"

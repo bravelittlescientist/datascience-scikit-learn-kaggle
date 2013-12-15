@@ -9,24 +9,27 @@ import os
 
 import numpy as np
 
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import accuracy_score
+from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier
+from sklearn.naive_bayes import GaussianNB
 from sklearn.cross_validation import cross_val_score
+from sklearn.svm import SVC
 
-def random_forest(Xtrain, Ytrain, Xtest):
-    """ Trains and predicts dataset with a 600-member random forest
+def train(Xtrain, Ytrain, Xtest):
+    """ Trains and predicts dataset with a classifier, I try a few.
 
     Prints cross-validation information, as well.
     Returns Ytest, predictions for the test data."""
 
-    print "Training a random forest..."
-    clf = RandomForestClassifier(n_estimators = 600)
+    # clf = RandomForestClassifier(n_estimators = 600)
+    # clf = GaussianNB()
+    # clf = AdaBoostClassifier()
+    clf = SVC()
 
     print "Average cross-validation performance, 10-fold:"
     scores = cross_val_score(clf, Xtrain, Ytrain, cv=10)
     print scores.mean(),"+/-",scores.std()
 
-    print "Predicting forest on test data..."
+    print "Predicting on test data"
     clf.fit(Xtrain, Ytrain)
     Ytest = clf.predict(Xtest)
     return Ytest
@@ -84,5 +87,5 @@ if __name__ == "__main__":
     Xtrain, Ytrain, Xtest = read_datasets()
 
     # Train random forest, predict result, write to output
-    Ytest = random_forest(Xtrain, Ytrain, Xtest)
+    Ytest = train(Xtrain, Ytrain, Xtest)
     write_test_labels(Ytest, outfile=predictionsFile)

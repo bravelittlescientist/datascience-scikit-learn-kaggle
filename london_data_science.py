@@ -9,34 +9,42 @@ import os
 
 import numpy as np
 
-# from sklearn.naive_bayes import GaussianNB
-# from sklearn.feature_selection import SelectKBest, f_regression
-# from sklearn.lda import LDA
-# from sklearn.grid_search import GridSearchCV
-# from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier, GradientBoostingClassifier, ExtraTreesClassifier
-#from sklearn.preprocessing import MinMaxScaler
-# from sklearn.feature_selection import SelectPercentile, f_classif
-
 from sklearn.svm import SVC
-from sklearn.cross_validation import cross_val_score
-from sklearn.linear_model import LogisticRegression
-from sklearn.neural_network import BernoulliRBM
-from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler
+from sklearn.cross_validation import StratifiedKFold, train_test_split
+from sklearn.grid_search import GridSearchCV
+from sklearn.metrics import accuracy_score
 
-def train(Xtrain, Ytrain, Xtest):
-    """ Trains and predicts dataset with a classifier, I try a few.
+def train(Xtrain, Ytrain, Xtest, set_aside=False):
+    """ Trains and predicts dataset with a SVM classifier """
 
-    Prints cross-validation information, as well.
-    Returns Ytest, predictions for the test data."""
-    clf = SVC()
+    set_aside=True
 
-    scores = cross_val_score(clf, Xtrain, Ytrain, cv=10)
-    print "Average cross-validation performance, 10-fold:"
-    print scores.mean(),"+/-",scores.std()
+    # Sometimes set aside some data for testing
+    if set_aside:
+        XtrainS, XtestS, YtrainS, YtestS = train_test_split(Xtrain, Ytrain, test_size=.1)
+    else:
+        XtrainS = Xtrain
+        YtrainS = Ytrain
 
-    print "Predicting on test data"
-    clf.fit(Xtrain, Ytrain)
-    Ytest = clf.predict(Xtest)
+    # Initialize grid search parameters
+    Cs = 10 ** np.arange(2,9)
+    gammas = 10 ** np.arange(-5,4)
+    param_grid = dict(gamma=gammas, C=Cs)
+
+    # Search grid.
+    cv = StratifiedKFold(y=YtrainS, n_folds=2)
+    grid = GridSearchCV(SVC(), param_grid=param_grid, cv=cv)
+    grid.fit(XtrainS, YtrainS)
+
+    print("The best classifier is: ", grid.best_estimator_)
+
+    # Report 10% training sample if set_aside is on
+    if set_aside:
+        print "Classifier performance on 10% data:",accuracy_score(YtestS, grid.predict(XtestS))
+
+    # predict on test data
+    Ytest = grid.predict(Xtest)
     return Ytest
 
 def write_test_labels(Ytest, outfile="data/testLabels.csv"):

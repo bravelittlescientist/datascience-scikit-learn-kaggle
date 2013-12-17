@@ -10,13 +10,20 @@ import os
 import numpy as np
 
 from sklearn.svm import SVC
+from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
 from sklearn.cross_validation import StratifiedKFold, train_test_split
 from sklearn.grid_search import GridSearchCV
 from sklearn.metrics import accuracy_score
+from sklearn.utils import shuffle
 
 def train(Xtrain, Ytrain, Xtest, set_aside=False):
     """ Trains and predicts dataset with a SVM classifier """
+
+    # Decomposition
+    pca = PCA(n_components=10, whiten=True)
+    Xtrain = pca.fit_transform(Xtrain)
+    Xtest = pca.transform(Xtest)
 
     set_aside=True
 
@@ -28,8 +35,8 @@ def train(Xtrain, Ytrain, Xtest, set_aside=False):
         YtrainS = Ytrain
 
     # Initialize grid search parameters
-    Cs = 10 ** np.arange(2,9)
-    gammas = 10 ** np.arange(-5,4)
+    Cs = 10.0 ** np.arange(-2,9)
+    gammas = 10.0 ** np.arange(-5,4)
     param_grid = dict(gamma=gammas, C=Cs)
 
     # Search grid.
